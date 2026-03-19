@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 using SixLabors.ImageSharp;
@@ -6,9 +6,6 @@ using SixLabors.ImageSharp.PixelFormats;
 
 public static class EncryptImgCrypt
 {
-    const int WIDTH = 1024;
-    const int HEIGHT = 1024;
-
     public static void Executar()
     {
         // ── Input type ────────────────────────────────────────────────────────
@@ -116,20 +113,38 @@ public static class EncryptImgCrypt
 
         byte[] finalBytes = ms.ToArray();
 
+        // ── Calculate image dimensions dynamically ────────────────────────────
+        const int WIDTH = 1024;
+        int totalPixels = (int)Math.Ceiling(finalBytes.Length / 3.0);
+        int height = (int)Math.Ceiling(totalPixels / (double)WIDTH);
+
+        // Guard: sanity check (~2 GB limit for int-based indexing)
+        long capacity = (long)WIDTH * height * 3;
+        if (capacity > int.MaxValue)
+        {
+            Console.WriteLine("File is too large to encrypt.");
+            return;
+        }
+
+        Console.WriteLine($"Image size: {WIDTH}x{height} ({finalBytes.Length:N0} bytes of payload)");
+
         // ── Write bytes into image ────────────────────────────────────────────
-        using Image<Rgb24> img = new Image<Rgb24>(WIDTH, HEIGHT);
+        using Image<Rgb24> img = new Image<Rgb24>(WIDTH, height);
 
         int index = 0;
-        for (int y = 0; y < HEIGHT; y++)
+        for (int y = 0; y < height; y++)
+        {
             for (int x = 0; x < WIDTH; x++)
             {
-                byte r = finalBytes[index % finalBytes.Length];
-                byte g = finalBytes[(index + 1) % finalBytes.Length];
-                byte b = finalBytes[(index + 2) % finalBytes.Length];
+                // Pad with zeros when payload ends (last partial pixel)
+                byte r = index     < finalBytes.Length ? finalBytes[index]     : (byte)0;
+                byte g = index + 1 < finalBytes.Length ? finalBytes[index + 1] : (byte)0;
+                byte b = index + 2 < finalBytes.Length ? finalBytes[index + 2] : (byte)0;
 
                 img[x, y] = new Rgb24(r, g, b);
                 index += 3;
             }
+        }
 
         // ── Save ──────────────────────────────────────────────────────────────
         string? outputFolder = Path.GetDirectoryName(destination);
