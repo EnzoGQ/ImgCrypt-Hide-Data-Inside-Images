@@ -110,6 +110,55 @@ dotnet add package SixLabors.ImageSharp
 
 ---
 
+## Building & Running
+
+### 1. Prerequisites
+
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [Git](https://git-scm.com)
+
+### 2. Clone the repository
+
+```bash
+git clone https://github.com/your-username/ImgCrypt.git
+cd ImgCrypt
+```
+
+### 3. Restore dependencies
+
+```bash
+dotnet restore
+```
+
+### 4. Build
+
+```bash
+dotnet build
+```
+
+### 5. Run
+
+```bash
+dotnet run
+```
+
+### 6. Publish as a standalone executable (optional)
+
+```bash
+# Windows
+dotnet publish -c Release -r win-x64 --self-contained true
+
+# Linux
+dotnet publish -c Release -r linux-x64 --self-contained true
+
+# macOS
+dotnet publish -c Release -r osx-x64 --self-contained true
+```
+
+The executable will be in `bin/Release/net10.0/<runtime>/publish/`.
+
+---
+
 ## License
 
 MIT License — free to use, modify, and distribute.
